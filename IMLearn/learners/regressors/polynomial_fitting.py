@@ -3,6 +3,7 @@ from typing import NoReturn
 from . import LinearRegression
 from ...base import BaseEstimator
 import numpy as np
+from IMLearn.metrics.loss_functions import mean_square_error
 
 
 class PolynomialFitting(BaseEstimator):
@@ -19,7 +20,11 @@ class PolynomialFitting(BaseEstimator):
             Degree of polynomial to fit
         """
         super().__init__()
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        self.degree = k
+        self.coef = None
+        self.linear_regress = LinearRegression()
+
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -33,7 +38,8 @@ class PolynomialFitting(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        x_vander = self.__transform(X)
+        self.linear_regress.fit(x_vander, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -49,7 +55,9 @@ class PolynomialFitting(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        x_vander = self.__transform(X)
+        return self.linear_regress._predict(x_vander)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -68,7 +76,11 @@ class PolynomialFitting(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        # x_vander = self.__transform(X)
+        y_hat = self._predict(X)
+        return mean_square_error(y, y_hat)
+        # return self.linear_regress._loss(x_vander, y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -83,4 +95,8 @@ class PolynomialFitting(BaseEstimator):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-        raise NotImplementedError()
+        a = np.vander(X, self.degree + 1)
+        b = a.T
+        c = b[::-1]
+        d = c.T
+        return d
